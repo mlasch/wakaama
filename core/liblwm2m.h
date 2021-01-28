@@ -582,8 +582,7 @@ typedef struct _lwm2m_context_ lwm2m_context_t;
  *
  * When used with an observe, if 'data' is not nil, 'status' holds the observe counter.
  */
-typedef void (*lwm2m_result_callback_t) (uint16_t clientID, lwm2m_uri_t * uriP, int status, lwm2m_media_type_t format, uint8_t * data, int dataLength, void * userData);
-
+typedef void (*lwm2m_result_callback_t) (uint16_t clientID, lwm2m_uri_t * uriP, int status, lwm2m_media_type_t format, lwm2m_data_t * dataP_tree, size_t num, void * userData);
 /*
  * Extended LWM2M result callback, use if there is a need to know number of blocks (count) and block_size transfered
  * count does also hold the observe counter

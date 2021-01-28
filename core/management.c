@@ -423,11 +423,19 @@ static void prv_applyCallback(dm_data_t * dataP, int status, int block_num, int 
     }
     else if(dataP->callback != NULL)
     {
+        // convert payload to generic data structure
+        lwm2m_data_t * dataP_tree = NULL;
+        size_t num = lwm2m_data_parse(&dataP->uri,
+                                       data,
+                                       dataLength,
+                                       format,
+                                       &dataP_tree);
         dataP->callback(dataP->clientID,
                         &dataP->uri,
                         status,
-                        format, data, dataLength,
+                        format, dataP_tree, num,
                         dataP->userData);
+        lwm2m_data_free(num, dataP_tree);
     }
 }
 

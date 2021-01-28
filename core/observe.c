@@ -901,10 +901,17 @@ void prv_applyObservationRequestCallback(observation_data_t * observationData, i
     }
     else if (observationData->callback != NULL)
     {
+        lwm2m_data_t * dataP_tree;
+        size_t num = lwm2m_data_parse(&observationData->uri,
+                                       data,
+                                       dataLength,
+                                       format,
+                                       &dataP_tree);
         observationData->callback(observationData->client,
                 &observationData->uri,
-                status, format, data, dataLength,
+                status, format, dataP_tree, num,
                 observationData->userData);
+        lwm2m_data_free(num, dataP_tree);
     }
 
 }
@@ -922,10 +929,17 @@ void applyObservationCallback(lwm2m_observation_t * observation, int status, int
     }
     else if (observation->callback != NULL)
     {
+        lwm2m_data_t * dataP_tree;
+        size_t num = lwm2m_data_parse(&observation->uri,
+                                      data,
+                                      dataLength,
+                                      format,
+                                      &dataP_tree);
         observation->callback(observation->clientP->internalID,
                 &observation->uri,
-                status, format, data, dataLength,
+                status, format, dataP_tree, num,
                 observation->userData);
+        lwm2m_data_free(num, dataP_tree);
     }
 
 }
@@ -1036,11 +1050,18 @@ void prv_applyCancelRequestCallback(cancellation_data_t * cancelP, int status, i
     }
     else if (cancelP->callbackP != NULL)
     {
+        lwm2m_data_t * dataP_tree = NULL;
+        size_t num = lwm2m_data_parse(&cancelP->uri,
+                                       data,
+                                       dataLength,
+                                       format,
+                                       &dataP_tree);
         cancelP->callbackP(cancelP->client,
                 &cancelP->uri,
                 status,  //?
-                format, data, dataLength,
+                format, dataP_tree, num,
                 cancelP->userDataP);
+        lwm2m_data_free(num, dataP_tree);
     }
 
 }
@@ -1358,11 +1379,18 @@ bool observe_handleNotify(lwm2m_context_t * contextP,
         }
         else if (observationP->callback != NULL)
         {
+            lwm2m_data_t * dataP_tree = NULL;
+            size_t num = lwm2m_data_parse(&observationP->uri,
+                                           message->payload,
+                                           message->payload_len,
+                                           utils_convertMediaType(message->content_type),
+                                           &dataP_tree);
             observationP->callback(clientID,
                     &observationP->uri,
                     (int)count,
-                    utils_convertMediaType(message->content_type), message->payload, message->payload_len,
+                    utils_convertMediaType(message->content_type), dataP_tree, num,
                     observationP->userData);
+            lwm2m_data_free(num, dataP_tree);
         }
     }
     return true;

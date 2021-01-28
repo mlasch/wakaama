@@ -238,8 +238,8 @@ static void prv_result_callback(uint16_t clientID,
                                 lwm2m_uri_t * uriP,
                                 int status,
                                 lwm2m_media_type_t format,
-                                uint8_t * data,
-                                int dataLength,
+                                lwm2m_data_t * dataP_tree,
+                                size_t num,
                                 void * userData)
 {
     fprintf(stdout, "\r\nClient #%d ", clientID);
@@ -247,8 +247,9 @@ static void prv_result_callback(uint16_t clientID,
     fprintf(stdout, " : ");
     print_status(stdout, status);
     fprintf(stdout, "\r\n");
+    fprintf(stdout, "NUMBER OF ELEMENTS %d", num);
 
-    output_data(stdout, format, data, dataLength, 1);
+//    output_data(stdout, format, data, dataLength, 1);
 
     fprintf(stdout, "\r\n> ");
     fflush(stdout);
@@ -258,15 +259,15 @@ static void prv_notify_callback(uint16_t clientID,
                                 lwm2m_uri_t * uriP,
                                 int count,
                                 lwm2m_media_type_t format,
-                                uint8_t * data,
-                                int dataLength,
+                                lwm2m_data_t * dataP_tree,
+                                size_t num,
                                 void * userData)
 {
     fprintf(stdout, "\r\nNotify from client #%d ", clientID);
     prv_printUri(uriP);
     fprintf(stdout, " number %d\r\n", count);
 
-    output_data(stdout, format, data, dataLength, 1);
+//    output_data(stdout, format, data, dataLength, 1);
 
     fprintf(stdout, "\r\n> ");
     fflush(stdout);
@@ -904,8 +905,8 @@ static void prv_monitor_callback(uint16_t clientID,
                                  lwm2m_uri_t * uriP,
                                  int status,
                                  lwm2m_media_type_t format,
-                                 uint8_t * data,
-                                 int dataLength,
+                                 lwm2m_data_t * dataP_tree,
+                                 size_t num,
                                  void * userData)
 {
     lwm2m_context_t * lwm2mH = (lwm2m_context_t *) userData;
