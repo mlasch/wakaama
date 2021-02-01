@@ -1472,7 +1472,7 @@ coap_get_header_block(void *packet, uint32_t *num, uint8_t *more, uint16_t *size
         return 1;
     }
 
-    return coap_get_header_block1(packet, num, more, size, offset);
+    return coap_get_header_block2(packet, num, more, size, offset);
 }
 
 

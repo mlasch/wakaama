@@ -528,7 +528,7 @@ static int prv_makeOperation(lwm2m_context_t * contextP,
         transaction_set_payload(transaction, buffer, length);
     }
 
-    if (callback != NULL)
+    if (callback != NULL || blockCallback != NULL)
     {
         dataP = (dm_data_t *)lwm2m_malloc(sizeof(dm_data_t));
         if (dataP == NULL)
