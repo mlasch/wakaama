@@ -1827,31 +1827,11 @@ uint8_t  registration_handleRequest(lwm2m_context_t * contextP,
                     nextP = observationP->next;
 
                     objP = (lwm2m_client_object_t *)lwm2m_list_find((lwm2m_list_t *)objects, observationP->uri.objectId);
-
-                    uint32_t block_num = 0;
-                    uint16_t block_size = 0;
-                    uint8_t block_more = 0;
-                    int has_block2 = coap_get_header_block2(message, &block_num, &block_more, &block_size, NULL);
-
-
                     if (objP == NULL)
                     {
-                        if (has_block2)
-                        {
-                            block_info_t block_info;
-                            block_info.block_num = 0;
-                            block_info.block_size = 0;
-                            block_info.block_more = false;
-                            observationP->callback(observationP->clientP->internalID, &observationP->uri,
-                                                   COAP_202_DELETED, &block_info, LWM2M_CONTENT_TEXT, NULL, 0,
-                                                   observationP->userData);
-                        }
-                        else
-                        {
-                            observationP->callback(observationP->clientP->internalID, &observationP->uri,
-                                                   COAP_202_DELETED, NULL, LWM2M_CONTENT_TEXT, NULL, 0,
-                                                   observationP->userData);
-                        }
+                        observationP->callback(observationP->clientP->internalID, &observationP->uri,
+                                               COAP_202_DELETED, NULL, LWM2M_CONTENT_TEXT, NULL, 0,
+                                               observationP->userData);
                         observe_remove(observationP);
                     }
                     else
@@ -1860,22 +1840,9 @@ uint8_t  registration_handleRequest(lwm2m_context_t * contextP,
                         {
                             if (lwm2m_list_find((lwm2m_list_t *)objP->instanceList, observationP->uri.instanceId) == NULL)
                             {
-                                if (has_block2)
-                                {
-                                    block_info_t block_info;
-                                    block_info.block_num = 0;
-                                    block_info.block_size = 0;
-                                    block_info.block_more = false;
-                                    observationP->callback(observationP->clientP->internalID, &observationP->uri,
-                                                           COAP_202_DELETED, &block_info, LWM2M_CONTENT_TEXT, NULL, 0,
-                                                           observationP->userData);
-                                }
-                                else
-                                {
-                                    observationP->callback(observationP->clientP->internalID, &observationP->uri,
-                                                           COAP_202_DELETED, NULL, LWM2M_CONTENT_TEXT, NULL, 0,
-                                                           observationP->userData);
-                                }
+                                observationP->callback(observationP->clientP->internalID, &observationP->uri,
+                                                       COAP_202_DELETED, NULL, LWM2M_CONTENT_TEXT, NULL, 0,
+                                                       observationP->userData);
                                 observe_remove(observationP);
                             }
                         }
