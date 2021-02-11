@@ -411,15 +411,6 @@ uint8_t dm_handleRequest(lwm2m_context_t * contextP,
 
 #define ID_AS_STRING_MAX_LEN 8
 
-//static void prv_applyCallback(dm_data_t * dataP, int status, block_info_t * block_info, lwm2m_media_type_t format, uint8_t * data, int dataLength)
-//{
-//    dataP->callback(dataP->clientID,
-//                    &dataP->uri, status, block_info,
-//                    format, data, dataLength,
-//                    dataP->userData);
-//}
-
-
 static void prv_resultCallback(lwm2m_context_t * contextP,
                                lwm2m_transaction_t * transacP,
                                void * message)
@@ -430,11 +421,6 @@ static void prv_resultCallback(lwm2m_context_t * contextP,
 
     if (message == NULL)
     {
-//        block_info_t block_info;
-//        block_info.block_num = 0;
-//        block_info.block_size = 0;
-//        block_info.block_more = false;
-        //prv_applyCallback(dataP, COAP_503_SERVICE_UNAVAILABLE, &block_info, LWM2M_CONTENT_TEXT, NULL, 0);
         dataP->callback(dataP->clientID,
                         &dataP->uri, COAP_503_SERVICE_UNAVAILABLE, NULL,
                         LWM2M_CONTENT_TEXT, NULL, 0,
@@ -501,10 +487,6 @@ static void prv_resultCallback(lwm2m_context_t * contextP,
                             utils_convertMediaType(packet->content_type), packet->payload, packet->payload_len,
                             dataP->userData);
         }
-
-
-
-
     }
     transaction_free_userData(contextP, transacP);
 }
@@ -517,7 +499,6 @@ static int prv_makeOperation(lwm2m_context_t * contextP,
                              uint8_t * buffer,
                              int length,
                              lwm2m_result_callback_t callback,
-//                             lwm2m_block_result_callback_t blockCallback,
                              void * userData)
 {
     lwm2m_client_t * clientP;
@@ -554,7 +535,6 @@ static int prv_makeOperation(lwm2m_context_t * contextP,
         memcpy(&dataP->uri, uriP, sizeof(lwm2m_uri_t));
         dataP->clientID = clientP->internalID;
         dataP->callback = callback;
-//        dataP->blockCallback = blockCallback;
         dataP->userData = userData;
 
         transaction->callback = prv_resultCallback;
@@ -571,7 +551,6 @@ int prv_lwm2m_dm_read(lwm2m_context_t * contextP,
                   uint16_t clientID,
                   lwm2m_uri_t * uriP,
                   lwm2m_result_callback_t callback,
-//                  lwm2m_block_result_callback_t blockCallback,
                   void * userData)
 {
     lwm2m_client_t * clientP;
@@ -596,15 +575,6 @@ int lwm2m_dm_read(lwm2m_context_t * contextP,
                   void * userData)
 {
     return prv_lwm2m_dm_read(contextP, clientID, uriP, callback, userData);
-}
-
-int lwm2m_dm_read_block(lwm2m_context_t * contextP,
-                  uint16_t clientID,
-                  lwm2m_uri_t * uriP,
-//                  lwm2m_block_result_callback_t blockCallback,
-                  void * userData)
-{
-    return prv_lwm2m_dm_read(contextP, clientID, uriP, NULL, userData);
 }
 
 static
@@ -657,19 +627,6 @@ int lwm2m_dm_write(lwm2m_context_t * contextP,
     return prv_lwm2m_dm_write(contextP, clientID, uriP, format, buffer, length, partialUpdate, callback, userData);
 }
 
-int lwm2m_dm_write_block(lwm2m_context_t * contextP,
-                   uint16_t clientID,
-                   lwm2m_uri_t * uriP,
-                   lwm2m_media_type_t format,
-                   uint8_t * buffer,
-                   int length,
-                   bool partialUpdate,
-//                   lwm2m_block_result_callback_t blockCallback,
-                   void * userData)
-{
-    return prv_lwm2m_dm_write(contextP, clientID, uriP, format, buffer, length, partialUpdate, NULL, userData);
-}
-
 int lwm2m_dm_execute(lwm2m_context_t * contextP,
                      uint16_t clientID,
                      lwm2m_uri_t * uriP,
@@ -699,7 +656,6 @@ int prv_lwm2m_dm_create(lwm2m_context_t * contextP,
                     int size,
                     lwm2m_data_t * dataP,
                     lwm2m_result_callback_t callback,
-//                    lwm2m_block_result_callback_t blockCallback,
                     void * userData)
 {
     uint8_t * buffer;
@@ -748,17 +704,6 @@ int lwm2m_dm_create(lwm2m_context_t * contextP,
                     void * userData)
 {
     return prv_lwm2m_dm_create(contextP, clientID, uriP, numData, dataP, callback, userData);
-}
-
-int lwm2m_dm_create_block(lwm2m_context_t * contextP,
-                    uint16_t clientID,
-                    lwm2m_uri_t * uriP,
-                    int numData,
-                    lwm2m_data_t * dataP,
-//                    lwm2m_block_result_callback_t blockCallback,
-                    void * userData)
-{
-    return prv_lwm2m_dm_create(contextP, clientID, uriP, numData, dataP, NULL, userData);
 }
 
 int lwm2m_dm_delete(lwm2m_context_t * contextP,
@@ -823,7 +768,6 @@ int lwm2m_dm_write_attributes(lwm2m_context_t * contextP,
         memcpy(&dataP->uri, uriP, sizeof(lwm2m_uri_t));
         dataP->clientID = clientP->internalID;
         dataP->callback = callback;
-//        dataP->blockCallback = NULL;
         dataP->userData = userData;
 
         transaction->callback = prv_resultCallback;
@@ -954,7 +898,6 @@ int lwm2m_dm_discover(lwm2m_context_t * contextP,
         memcpy(&dataP->uri, uriP, sizeof(lwm2m_uri_t));
         dataP->clientID = clientP->internalID;
         dataP->callback = callback;
-//        dataP->blockCallback  = NULL;
         dataP->userData = userData;
 
         transaction->callback = prv_resultCallback;

@@ -1842,7 +1842,6 @@ uint8_t  registration_handleRequest(lwm2m_context_t * contextP,
                             block_info.block_num = 0;
                             block_info.block_size = 0;
                             block_info.block_more = false;
-                            // applyObservationCallback(observationP, COAP_202_DELETED, &block_info, LWM2M_CONTENT_TEXT, NULL, 0);
                             observationP->callback(observationP->clientP->internalID, &observationP->uri,
                                                    COAP_202_DELETED, &block_info, LWM2M_CONTENT_TEXT, NULL, 0,
                                                    observationP->userData);
@@ -1861,7 +1860,6 @@ uint8_t  registration_handleRequest(lwm2m_context_t * contextP,
                         {
                             if (lwm2m_list_find((lwm2m_list_t *)objP->instanceList, observationP->uri.instanceId) == NULL)
                             {
-                                //applyObservationCallback(observationP, COAP_202_DELETED, &block_info, LWM2M_CONTENT_TEXT, NULL, 0);
                                 if (has_block2)
                                 {
                                     block_info_t block_info;
@@ -1894,7 +1892,6 @@ uint8_t  registration_handleRequest(lwm2m_context_t * contextP,
 
             if (contextP->monitorCallback != NULL)
             {
-                // registration update callback?
                 contextP->monitorCallback(clientP->internalID, NULL, COAP_204_CHANGED, NULL, LWM2M_CONTENT_TEXT, NULL, 0, contextP->monitorUserData);
             }
             result = COAP_204_CHANGED;

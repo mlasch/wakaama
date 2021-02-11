@@ -244,7 +244,6 @@ typedef struct
     uint16_t clientID;
     lwm2m_uri_t uri;
     lwm2m_result_callback_t callback;
-//    lwm2m_block_result_callback_t blockCallback;
     void * userData;
 } dm_data_t;
 
@@ -254,7 +253,6 @@ typedef struct
     uint16_t                client;
     lwm2m_uri_t             uri;
     lwm2m_result_callback_t callback;
-//    lwm2m_block_result_callback_t blockCallback;
     void *                  userData;
     lwm2m_context_t *       contextP;
 } observation_data_t;

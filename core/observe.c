@@ -852,7 +852,6 @@ typedef struct
     uint16_t                        client;
     lwm2m_uri_t                     uri;
     lwm2m_result_callback_t         callbackP;
-//    lwm2m_block_result_callback_t   blockCallbackP;
     void *                          userDataP;
     lwm2m_context_t *               contextP;
 } cancellation_data_t;
@@ -888,23 +887,6 @@ void observe_remove(lwm2m_observation_t * observationP)
     observationP->clientP->observationList = (lwm2m_observation_t *) LWM2M_LIST_RM(observationP->clientP->observationList, observationP->id, NULL);
     lwm2m_free(observationP);
 }
-//static
-//void prv_applyObservationRequestCallback(observation_data_t * observationData, int status, block_info_t * block_info, lwm2m_media_type_t format, uint8_t * data, int dataLength)
-//{
-//    observationData->callback(observationData->client,
-//            &observationData->uri,
-//            status,
-//            block_info,
-//            format,data, dataLength,
-//            observationData->userData);
-//}
-
-//void applyObservationCallback(lwm2m_observation_t * observation, int status, block_info_t * block_info, lwm2m_media_type_t format, uint8_t * data, int dataLength)
-//{
-//    observation->callback(observation->clientP->internalID,
-//                          &observation->uri, status, block_info, format, data, dataLength,
-//                          observation->userData);
-//}
 
 static void prv_obsRequestCallback(lwm2m_context_t * contextP,
                                    lwm2m_transaction_t * transacP,
@@ -932,14 +914,9 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
     clientP = (lwm2m_client_t *)lwm2m_list_find((lwm2m_list_t *)observationData->contextP->clientList, observationData->client);
     if (clientP == NULL)
     {
-//        prv_applyObservationRequestCallback(observationData,
-//                COAP_500_INTERNAL_SERVER_ERROR,  //?
-//                &block_info,
-//                0, NULL, 0);
         if (has_block2)
         {
-            // do we need a block transfer here?
-
+            // Do we need a block transfer here?
             observationData->callback(observationData->client,
                                       &observationData->uri,
                                       COAP_500_INTERNAL_SERVER_ERROR,  //?
@@ -983,29 +960,6 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
 
     if (code != COAP_205_CONTENT || (IS_OPTION(packet, COAP_OPTION_BLOCK2) && packet->block2_more))
     {
-        //prv_applyObservationRequestCallback(observationData, code, &block_info, LWM2M_CONTENT_TEXT, NULL, 0);
-//        if (has_block2)
-//        {
-//            block_info_t block_info;
-//            block_info.block_num = block_num;
-//            block_info.block_size = block_size;
-//            block_info.block_more = block_more;
-//            observationData->callback(observationData->client,
-//                                      &observationData->uri,
-//                                      code,  //?
-//                                      &block_info,
-//                                      LWM2M_CONTENT_TEXT, NULL, 0,
-//                                      observationData->userData);
-//        }
-//        else
-//        {
-//            observationData->callback(observationData->client,
-//                                      &observationData->uri,
-//                                      code,  //?
-//                                      NULL,
-//                                      LWM2M_CONTENT_TEXT, NULL, 0,
-//                                      observationData->userData);
-//        }
         observationData->callback(observationData->client,
                                   &observationData->uri,
                                   code,  //?
@@ -1017,9 +971,6 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
     }
     else
     {
-        /*
-         * Handle 2.05 content (observe request response & notify)
-         */
         if(observationP == NULL)
         {
             observationP = (lwm2m_observation_t *)lwm2m_malloc(sizeof(*observationP));
@@ -1032,30 +983,6 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
 
             // give the user chance to free previous observation userData
             // indicator: COAP_202_DELETED and (Length ==0)
-            //prv_applyObservationRequestCallback(observationData, COAP_202_DELETED, &block_info, 0, NULL, 0);
-            // makes no sense to check block2 here
-//            if (has_block2)
-//            {
-//                block_info_t block_info;
-//                block_info.block_num = block_num;
-//                block_info.block_size = block_size;
-//                block_info.block_more = block_more;
-//                observationData->callback(observationData->client,
-//                                          &observationData->uri,
-//                                          COAP_202_DELETED,
-//                                          &block_info,
-//                                          LWM2M_CONTENT_TEXT, NULL, 0,
-//                                          observationData->userData);
-//            }
-//            else
-//            {
-//                observationData->callback(observationData->client,
-//                                          &observationData->uri,
-//                                          COAP_202_DELETED,
-//                                          NULL,
-//                                          LWM2M_CONTENT_TEXT, NULL, 0,
-//                                          observationData->userData);
-//            }
             observationData->callback(observationData->client,
                                       &observationData->uri,
                                       COAP_202_DELETED,
@@ -1068,26 +995,15 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
         observationP->clientP = clientP;
 
         observationP->callback = observationData->callback;
-        //observationP->blockCallback = observationData->blockCallback;
         observationP->userData = observationData->userData;
         observationP->status = STATE_REGISTERED;
         memcpy(&observationP->uri, uriP, sizeof(lwm2m_uri_t));
 
         observationP->clientP->observationList = (lwm2m_observation_t *)LWM2M_LIST_ADD(observationP->clientP->observationList, observationP);
 
-        /*
-         * Handle observe result callback
-         */
         const int status = 0;
-//        uint32_t block_num = 0;
-//        uint16_t block_size = 0;
-//        uint8_t block_more = 0;
 
         if (has_block2) {
-            //block_info_t block_info;
-//            block_info.block_num = block_num;
-//            block_info.block_size = block_size;
-//            block_info.block_more = block_more;
             observationData->callback(observationData->client,
                                       &observationData->uri,
                                       status,
@@ -1176,10 +1092,6 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
     {
         if (has_block2)
         {
-//            block_info_t block_info;
-//            block_info.block_num = block_num;
-//            block_info.block_size = block_size;
-//            block_info.block_more = block_more;
             cancelP->callbackP(cancelP->client,
                                &cancelP->uri,
                                code,  //?
@@ -1206,10 +1118,6 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
         const int status = 0;
         if (has_block2)
         {
-//            block_info_t block_info;
-//            block_info.block_num = block_num;
-//            block_info.block_size = block_size;
-//            block_info.block_more = block_more;
             cancelP->callbackP(cancelP->client,
                                &cancelP->uri,
                                status,  //?
@@ -1234,7 +1142,7 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
 
     if (!has_block2 || !block_info.block_more)
     {
-        // remove observation only if there is no block transfer or if
+        // Remove observation only if there is no block transfer or if
         // its the last block.
         observe_remove(observationP);
     }
@@ -1248,7 +1156,6 @@ int prv_lwm2m_observe(lwm2m_context_t * contextP,
         uint16_t clientID,
         lwm2m_uri_t * uriP,
         lwm2m_result_callback_t callback,
-//        lwm2m_block_result_callback_t blockCallback,
         void * userData)
 {
     lwm2m_client_t * clientP;
@@ -1286,7 +1193,6 @@ int prv_lwm2m_observe(lwm2m_context_t * contextP,
     // don't hold refer to the clientP
     observationData->client = clientP->internalID;
     observationData->callback = callback;
- //   observationData->blockCallback = blockCallback;
     observationData->userData = userData;
     observationData->contextP = contextP;
 
@@ -1332,29 +1238,14 @@ int lwm2m_observe(lwm2m_context_t * contextP,
                              clientID,
                              uriP,
                              callback,
-//                             NULL,
                              userData);
 }
 
-//int lwm2m_observe_block(lwm2m_context_t * contextP,
-//        uint16_t clientID,
-//        lwm2m_uri_t * uriP,
-//        lwm2m_block_result_callback_t blockCallback,
-//        void * userData)
-//{
-//    return prv_lwm2m_observe(contextP,
-//                             clientID,
-//                             uriP,
-//                             NULL,
-//                             blockCallback,
-//                             userData);
-//}
 static
 int prv_lwm2m_observe_cancel(lwm2m_context_t * contextP,
         uint16_t clientID,
         lwm2m_uri_t * uriP,
         lwm2m_result_callback_t callback,
-//        lwm2m_block_result_callback_t blockCallback,
         void * userData)
 {
     lwm2m_client_t * clientP;
@@ -1401,7 +1292,6 @@ int prv_lwm2m_observe_cancel(lwm2m_context_t * contextP,
         cancelP->client = clientP->internalID;
         memcpy(&cancelP->uri, uriP, sizeof(lwm2m_uri_t));
         cancelP->callbackP = callback;
-//        cancelP->blockCallbackP = blockCallback;
         cancelP->userDataP = userData;
         cancelP->contextP = contextP;
 
@@ -1445,15 +1335,6 @@ int lwm2m_observe_cancel(lwm2m_context_t * contextP,
     return prv_lwm2m_observe_cancel(contextP, clientID, uriP, callback, userData);
 }
 
-//int lwm2m_observe_cancel_block(lwm2m_context_t * contextP,
-//        uint16_t clientID,
-//        lwm2m_uri_t * uriP,
-//        lwm2m_block_result_callback_t blockCallback,
-//        void * userData)
-//{
-//    return prv_lwm2m_observe_cancel(contextP, clientID, uriP, NULL, blockCallback, userData);
-//}
-
 bool observe_handleNotify(lwm2m_context_t * contextP,
                            void * fromSessionH,
                            coap_packet_t * message,
@@ -1494,7 +1375,7 @@ bool observe_handleNotify(lwm2m_context_t * contextP,
 
         /*
          * Handle notify callback
-         * TODO: status is misused by notify counter value
+         * TODO: status is misused by notify counter value. Issue #521
          */
         uint32_t block_num = 0;
         uint16_t block_size = 0;
