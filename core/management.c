@@ -423,7 +423,7 @@ static void prv_resultCallback(lwm2m_context_t * contextP,
     {
         dataP->callback(dataP->clientID,
                         &dataP->uri, COAP_503_SERVICE_UNAVAILABLE, NULL,
-                        LWM2M_CONTENT_TEXT, NULL, 0,
+                        NULL, 0,
                         dataP->userData);
     }
     else
@@ -470,8 +470,16 @@ static void prv_resultCallback(lwm2m_context_t * contextP,
         uint32_t block_num = 0;
         uint16_t block_size = 0;
         uint8_t block_more = 0;
+        lwm2m_data_t * lwm2m_data = NULL;
+        uint32_t size = 0;
+
         block_info_t block_info;
         int has_block2 = coap_get_header_block2(message, &block_num, &block_more, &block_size, NULL);
+
+        if (!has_block2 || (has_block2 && !block_more))
+        {
+            size = lwm2m_data_parse(&dataP->uri, packet->payload, packet->payload_len, utils_convertMediaType(packet->content_type), &lwm2m_data);
+        }
         if (has_block2)
         {
             block_info.block_num = block_num;
@@ -479,14 +487,17 @@ static void prv_resultCallback(lwm2m_context_t * contextP,
             block_info.block_more = block_more;
             dataP->callback(dataP->clientID,
                             &dataP->uri, packet->code, &block_info,
-                            utils_convertMediaType(packet->content_type), packet->payload, packet->payload_len,
+                            lwm2m_data,
+                            size,
                             dataP->userData);
         } else {
             dataP->callback(dataP->clientID,
                             &dataP->uri, packet->code, NULL,
-                            utils_convertMediaType(packet->content_type), packet->payload, packet->payload_len,
+                            lwm2m_data,
+                            size,
                             dataP->userData);
         }
+        lwm2m_data_free(size, lwm2m_data_parse);
     }
     transaction_free_userData(contextP, transacP);
 }

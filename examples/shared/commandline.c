@@ -305,74 +305,82 @@ void output_tlv(FILE * stream,
 
 void output_data(FILE * stream,
                  block_info_t * block_info,
-                 lwm2m_media_type_t format,
-                 uint8_t * data,
-                 int dataLength,
+                 lwm2m_data_t * lwm2m_data,
                  int indent)
 {
     int i;
 
     print_indent(stream, indent);
-    if (block_info != NULL) {
+    if (block_info != NULL)
+    {
         fprintf(stream, "block transfer: size: %d, num: %d, more: %d\n\r", block_info->block_size, block_info->block_num, block_info->block_more);
-    } else {
+    } else
+    {
         fprintf(stream, "non block transfer\n\r");
     }
+
     print_indent(stream, indent);
-    fprintf(stream, "%d bytes received of type ", dataLength);
-
-    switch (format)
+    if (lwm2m_data != NULL)
     {
-    case LWM2M_CONTENT_TEXT:
-        fprintf(stream, "text/plain:\r\n");
-        output_buffer(stream, data, dataLength, indent);
-        break;
-
-    case LWM2M_CONTENT_OPAQUE:
-        fprintf(stream, "application/octet-stream:\r\n");
-        output_buffer(stream, data, dataLength, indent);
-        break;
-
-    case LWM2M_CONTENT_TLV:
-        fprintf(stream, "application/vnd.oma.lwm2m+tlv:\r\n");
-        output_tlv(stream, data, dataLength, indent);
-        break;
-
-    case LWM2M_CONTENT_JSON:
-        fprintf(stream, "application/vnd.oma.lwm2m+json:\r\n");
-        print_indent(stream, indent);
-        for (i = 0 ; i < dataLength ; i++)
-        {
-            fprintf(stream, "%c", data[i]);
-        }
-        fprintf(stream, "\n");
-        break;
-
-    case LWM2M_CONTENT_SENML_JSON:
-        fprintf(stream, "application/senml+json:\r\n");
-        print_indent(stream, indent);
-        for (i = 0 ; i < dataLength ; i++)
-        {
-            fprintf(stream, "%c", data[i]);
-        }
-        fprintf(stream, "\n");
-        break;
-
-    case LWM2M_CONTENT_LINK:
-        fprintf(stream, "application/link-format:\r\n");
-        print_indent(stream, indent);
-        for (i = 0 ; i < dataLength ; i++)
-        {
-            fprintf(stream, "%c", data[i]);
-        }
-        fprintf(stream, "\n");
-        break;
-
-    default:
-        fprintf(stream, "Unknown (%d):\r\n", format);
-        output_buffer(stream, data, dataLength, indent);
-        break;
+        fprintf(stream, "Found data\n\r");
+        // TODO print data
     }
+    else
+    {
+        fprintf(stream, "No data with callback\n\r");
+    }
+//    switch (format)
+//    {
+//    case LWM2M_CONTENT_TEXT:
+//        fprintf(stream, "text/plain:\r\n");
+//        output_buffer(stream, data, dataLength, indent);
+//        break;
+//
+//    case LWM2M_CONTENT_OPAQUE:
+//        fprintf(stream, "application/octet-stream:\r\n");
+//        output_buffer(stream, data, dataLength, indent);
+//        break;
+//
+//    case LWM2M_CONTENT_TLV:
+//        fprintf(stream, "application/vnd.oma.lwm2m+tlv:\r\n");
+//        output_tlv(stream, data, dataLength, indent);
+//        break;
+//
+//    case LWM2M_CONTENT_JSON:
+//        fprintf(stream, "application/vnd.oma.lwm2m+json:\r\n");
+//        print_indent(stream, indent);
+//        for (i = 0 ; i < dataLength ; i++)
+//        {
+//            fprintf(stream, "%c", data[i]);
+//        }
+//        fprintf(stream, "\n");
+//        break;
+//
+//    case LWM2M_CONTENT_SENML_JSON:
+//        fprintf(stream, "application/senml+json:\r\n");
+//        print_indent(stream, indent);
+//        for (i = 0 ; i < dataLength ; i++)
+//        {
+//            fprintf(stream, "%c", data[i]);
+//        }
+//        fprintf(stream, "\n");
+//        break;
+//
+//    case LWM2M_CONTENT_LINK:
+//        fprintf(stream, "application/link-format:\r\n");
+//        print_indent(stream, indent);
+//        for (i = 0 ; i < dataLength ; i++)
+//        {
+//            fprintf(stream, "%c", data[i]);
+//        }
+//        fprintf(stream, "\n");
+//        break;
+//
+//    default:
+//        fprintf(stream, "Unknown (%d):\r\n", format);
+//        output_buffer(stream, data, dataLength, indent);
+//        break;
+//    }
 }
 
 void dump_tlv(FILE * stream,

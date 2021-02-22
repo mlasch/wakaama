@@ -921,7 +921,8 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
                                       &observationData->uri,
                                       COAP_500_INTERNAL_SERVER_ERROR,  //?
                                       &block_info,
-                                      LWM2M_CONTENT_TEXT, NULL, 0,
+                                      NULL,
+                                      0,
                                       observationData->userData);
         }
         else
@@ -930,7 +931,8 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
                                       &observationData->uri,
                                       COAP_500_INTERNAL_SERVER_ERROR,  //?
                                       NULL,
-                                      LWM2M_CONTENT_TEXT, NULL, 0,
+                                      NULL,
+                                      0,
                                       observationData->userData);
         }
 
@@ -960,13 +962,16 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
 
     if (code != COAP_205_CONTENT || (IS_OPTION(packet, COAP_OPTION_BLOCK2) && packet->block2_more))
     {
+        // TODO parse
+        lwm2m_data_t * lwm2m_data;
+//        utils_convertMediaType(packet->content_type),
+//                packet->payload,
+//                packet->payload_len,
         observationData->callback(observationData->client,
                                   &observationData->uri,
                                   code,  //?
                                   NULL,
-                                  utils_convertMediaType(packet->content_type),
-                                  packet->payload,
-                                  packet->payload_len,
+                                  lwm2m_data,
                                   observationData->userData);
     }
     else
@@ -987,7 +992,8 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
                                       &observationData->uri,
                                       COAP_202_DELETED,
                                       NULL,
-                                      LWM2M_CONTENT_TEXT, NULL, 0,
+                                      NULL,
+                                      0,
                                       observationData->userData);
         }
 
@@ -1003,23 +1009,24 @@ static void prv_obsRequestCallback(lwm2m_context_t * contextP,
 
         const int status = 0;
 
+        lwm2m_data_t * lwm2m_data;
+//        utils_convertMediaType(packet->content_type),
+//                packet->payload,
+//                packet->payload_len,
+
         if (has_block2) {
             observationData->callback(observationData->client,
                                       &observationData->uri,
                                       status,
                                       &block_info,
-                                      utils_convertMediaType(packet->content_type),
-                                      packet->payload,
-                                      packet->payload_len,
+                                      lwm2m_data,
                                       observationData->userData);
         } else {
             observationData->callback(observationData->client,
                                       &observationData->uri,
                                       status,
                                       NULL,
-                                      utils_convertMediaType(packet->content_type),
-                                      packet->payload,
-                                      packet->payload_len,
+                                      lwm2m_data,
                                       observationData->userData);
         }
     }
@@ -1040,6 +1047,8 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
     uint16_t block_size = 0;
     uint8_t block_more = 0;
     block_info_t block_info;
+    lwm2m_data_t * lwm2m_data = NULL;
+    uint32_t size = 0;
     int has_block2 = coap_get_header_block2(message, &block_num, &block_more, &block_size, NULL);
     if (has_block2)
     {
@@ -1047,7 +1056,10 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
         block_info.block_size = block_size;
         block_info.block_more = block_more;
     }
-
+    if (!has_block2 || (has_block2 && !block_more))
+    {
+        size = lwm2m_data_parse(&cancelP->uri, packet->payload, packet->payload_len, utils_convertMediaType(packet->content_type), &lwm2m_data);
+    }
     (void)contextP; /* unused */
 
     if (clientP == NULL)
@@ -1058,7 +1070,6 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
                                &cancelP->uri,
                                COAP_500_INTERNAL_SERVER_ERROR,  //?
                                &block_info,
-                               utils_convertMediaType(packet->content_type),
                                NULL,
                                0,
                                cancelP->userDataP);
@@ -1069,7 +1080,6 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
                                &cancelP->uri,
                                COAP_500_INTERNAL_SERVER_ERROR,  //?
                                NULL,
-                               utils_convertMediaType(packet->content_type),
                                NULL,
                                0,
                                cancelP->userDataP);
@@ -1096,7 +1106,6 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
                                &cancelP->uri,
                                code,  //?
                                &block_info,
-                               utils_convertMediaType(packet->content_type),
                                NULL,
                                0,
                                cancelP->userDataP);
@@ -1107,7 +1116,6 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
                                &cancelP->uri,
                                code,  //?
                                NULL,
-                               utils_convertMediaType(packet->content_type),
                                NULL,
                                0,
                                cancelP->userDataP);
@@ -1122,9 +1130,8 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
                                &cancelP->uri,
                                status,  //?
                                &block_info,
-                               utils_convertMediaType(packet->content_type),
-                               packet->payload,
-                               packet->payload_len,
+                               lwm2m_data,
+                               size,
                                cancelP->userDataP);
         }
         else
@@ -1133,14 +1140,14 @@ static void prv_obsCancelRequestCallback(lwm2m_context_t * contextP,
                                &cancelP->uri,
                                status,  //?
                                NULL,
-                               utils_convertMediaType(packet->content_type),
-                               packet->payload,
-                               packet->payload_len,
+                               lwm2m_data,
+                               size,
                                cancelP->userDataP);
         }
+        lwm2m_data_free(size, lwm2m_data_parse);
     }
 
-    if (!has_block2 || !block_info.block_more)
+    if (!has_block2 || (has_block2 && !block_info.block_more))
     {
         // Remove observation only if there is no block transfer or if
         // its the last block.
@@ -1381,7 +1388,15 @@ bool observe_handleNotify(lwm2m_context_t * contextP,
         uint16_t block_size = 0;
         uint8_t block_more = 0;
 
-        if (coap_get_header_block2(message, &block_num, &block_more, &block_size, NULL)) {
+        lwm2m_data_t * lwm2m_data;
+        uint32_t num;
+        int has_block2 = coap_get_header_block2(message, &block_num, &block_more, &block_size, NULL);
+        if (!has_block2 || (has_block2 && block_more == false))
+        {
+            num = lwm2m_data_parse(&observationP->uri, message->payload, message->payload_len, utils_convertMediaType(message->content_type), &lwm2m_data);
+        }
+        if (has_block2)
+        {
             block_info_t block_info;
             block_info.block_num = block_num;
             block_info.block_size = block_size;
@@ -1390,14 +1405,18 @@ bool observe_handleNotify(lwm2m_context_t * contextP,
                                    &observationP->uri,
                                    (int)count,
                                    &block_info,
-                                   utils_convertMediaType(message->content_type), message->payload, message->payload_len,
+                                   lwm2m_data,
+                                   num,
                                    observationP->userData);
-        } else {
+        }
+        else
+        {
             observationP->callback(clientID,
                                    &observationP->uri,
                                    (int)count,
                                    NULL,
-                                   utils_convertMediaType(message->content_type), message->payload, message->payload_len,
+                                   lwm2m_data,
+                                   num,
                                    observationP->userData);
         }
     }

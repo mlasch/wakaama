@@ -589,7 +589,7 @@ typedef struct _block_info_t
  *
  * When used with an observe, if 'data' is not nil, 'status' holds the observe counter.
  */
-typedef void (*lwm2m_result_callback_t) (uint16_t clientID, lwm2m_uri_t * uriP, int status, block_info_t * block_info, lwm2m_media_type_t format, uint8_t * data, int dataLength, void * userData);
+typedef void (*lwm2m_result_callback_t) (uint16_t clientID, lwm2m_uri_t * uriP, int status, block_info_t * block_info, lwm2m_data_t * lwm2m_data, int num, void * userData);
 
 /*
  * LWM2M Observations
