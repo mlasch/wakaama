@@ -378,11 +378,7 @@ int lwm2m_step(lwm2m_context_t * contextP,
 {
     time_t tv_sec;
 
-#if __TIMESIZE == 64
-	LOG_ARG("timeoutP: %" PRId64, *timeoutP);
-#else
-	LOG_ARG("timeoutP: %" PRId32, *timeoutP);
-#endif
+    LOG_ARG("timeoutP: %d", (int) *timeoutP);
     tv_sec = lwm2m_gettime();
     if (tv_sec < 0) return COAP_500_INTERNAL_SERVER_ERROR;
 
@@ -492,11 +488,9 @@ next_step:
     registration_step(contextP, tv_sec, timeoutP);
     transaction_step(contextP, tv_sec, timeoutP);
 
-#if __TIMESIZE == 64
-	LOG_ARG("Final timeoutP: %" PRId64, *timeoutP);
-#else
-	LOG_ARG("Final timeoutP: %" PRId32, *timeoutP);
-#endif
+
+    LOG_ARG("Final timeoutP: %d", (int) *timeoutP);
+
 #ifdef LWM2M_CLIENT_MODE
     LOG_ARG("Final state: %s", STR_STATE(contextP->state));
 #endif
