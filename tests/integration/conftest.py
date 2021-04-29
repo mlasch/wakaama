@@ -1,6 +1,7 @@
 import pytest
 import pexpect
 
+
 class Helper:
 
     def __init__(self, obj):
@@ -43,18 +44,61 @@ class Helper:
         return True
 
 
+class Lwm2mBase:
+    def __dumptext(self):
+        print("Debug help: actual output---------------------")
+        print(self.instance.before)
+        print("----------------------------------------------")
+
+    def commandresponse(self, cmd,resp):
+        self.instance.sendline(cmd)
+        try:
+            self.instance.expect_exact(resp)
+        except:
+            self.__dumptext()
+            return False
+        return True
+
+    def waitforpacket(self):
+        try:
+            self.instance.expect_exact("bytes received from")
+        except:
+            self.__dumptext()
+            assert False
+        #save match line
+        try:
+            self.instance.expect_exact("\r\r\n>")
+        except:
+            __dumptext()
+            assert False
+        return self.instance.before
+
+    def waitfortext(self,txt):
+        try:
+            self.instance.expect_exact(txt)
+        except:
+            self.__dumptext()
+            return False
+        return True
+
+    def quit(self):
+        self.instance.sendline("q")
+        self.instance.expect(pexpect.EOF)
+
+
+class Lwm2mServer(Lwm2mBase):
+    def __init__(self, path, timeout=3, encoding="utf8"):
+        self.instance = pexpect.spawn(path,
+                               encoding=encoding,
+                               timeout=timeout)
+
+
 @pytest.fixture
 def lwm2mserver():
     """Provide lwm2mserver instance."""
-    server = pexpect.spawn("build-wakaama/examples/server/lwm2mserver",
-                           encoding="utf8",
-                           timeout=3)
-    # uncomment to enable logging, helpful when debugging
-    # server.logfile = open("lwm2mserver_log.txt", "w")
-    server.expect_exact("> ")
+    server = Lwm2mServer("build-wakaama/examples/server/lwm2mserver")
     yield server
-    server.sendline("q")
-    server.expect(pexpect.EOF)
+    server.quit()
 
 
 @pytest.fixture

@@ -35,9 +35,8 @@ def test_registration_interface(lwm2mserver, lwm2mclient):
     """LightweightM2M-1.1-int-101
     Test that the Client registers with the Server."""
 
-    server = Helper(lwm2mserver)
     #assert waitforprompt(lwm2mserver) # (client connected)
-    text = server.waitforpacket()
+    text = lwm2mserver.waitforpacket()
     #print(server)
     client_id, event, endpoint, version, binding, lifetime, objects = \
         parse_client_registration(text)
