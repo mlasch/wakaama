@@ -370,13 +370,14 @@ static int prv_send_next_block1(lwm2m_context_t * contextP, void * sessionH, uin
     return prv_send_new_block1(contextP, transaction, block_num, block_size);
 }
 
+/* TODO size should be size_t */
 static int prv_change_to_block1(lwm2m_context_t * contextP, void * sessionH, uint16_t mid, uint32_t size){
     lwm2m_transaction_t * transaction;
     uint16_t block_size = 16;
     
     transaction = prv_get_transaction(contextP, sessionH, mid);
 
-    for (int n = 1; 16 << n <= (int)size ; n++) {
+    for (uint16_t n = 1; 16 << n <= (int)size ; n++) {
         block_size = 16 << n;
     }
 
@@ -473,6 +474,9 @@ void lwm2m_handle_packet(lwm2m_context_t * contextP,
     static coap_packet_t response[1];
 
     LOG("Entering");
+    /* The buffer length is uint16_t here, as UDP packet length field is 16 bit.
+     * This might change in the future e.g. for supporting TCP.
+     */
     coap_error_code = coap_parse_message(message, buffer, (uint16_t)length);
     if (coap_error_code == NO_ERROR)
     {

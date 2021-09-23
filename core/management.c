@@ -497,7 +497,7 @@ static int prv_makeOperation(lwm2m_context_t * contextP,
                              coap_method_t method,
                              lwm2m_media_type_t format,
                              uint8_t * buffer,
-                             int length,
+                             size_t length,
                              lwm2m_result_callback_t callback,
                              void * userData)
 {

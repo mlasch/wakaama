@@ -600,7 +600,7 @@ typedef struct _block_info_t
  *
  * When used with an observe, if 'data' is not nil, 'status' holds the observe counter.
  */
-typedef void (*lwm2m_result_callback_t) (lwm2m_context_t * contextP, uint16_t clientID, lwm2m_uri_t * uriP, int status, block_info_t * block_info, lwm2m_media_type_t format, uint8_t * data, int dataLength, void * userData);
+typedef void (*lwm2m_result_callback_t) (lwm2m_context_t * contextP, uint16_t clientID, lwm2m_uri_t * uriP, int status, block_info_t * block_info, lwm2m_media_type_t format, uint8_t * data, size_t dataLength, void * userData);
 
 /*
  * LWM2M Observations
@@ -706,7 +706,7 @@ struct _lwm2m_transaction_
     void * message;
     uint16_t buffer_len;
     uint8_t * buffer;
-    uint16_t payload_len; // the length of the entire payload, message payload might be smaller in case of a block1 transfer
+    size_t payload_len; // the length of the entire payload, message payload might be smaller in case of a block1 transfer
     uint8_t * payload; // carries the entire payload accross multiple transactions in case of a block 1 transfer
     lwm2m_transaction_callback_t callback;
     void * userData;
@@ -771,7 +771,7 @@ typedef enum
 // After a lwm2m_bootstrap_delete() or a lwm2m_bootstrap_write(), the callback is called with the status returned by the
 // client, the URI of the operation (may be nil) and name is nil. The callback return value is ignored.
 // If data is present and no preferred format is provided by the client the format will be 0, otherwise it will be set.
-typedef int (*lwm2m_bootstrap_callback_t) (lwm2m_context_t * contextP, void * sessionH, uint8_t status, lwm2m_uri_t * uriP, char * name, lwm2m_media_type_t format, uint8_t * data, uint16_t dataLength, void * userData);
+typedef int (*lwm2m_bootstrap_callback_t) (lwm2m_context_t * contextP, void * sessionH, uint8_t status, lwm2m_uri_t * uriP, char * name, lwm2m_media_type_t format, uint8_t * data, size_t dataLength, void * userData);
 #endif
 
 struct _lwm2m_context_

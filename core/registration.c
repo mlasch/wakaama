@@ -785,7 +785,7 @@ static uint8_t prv_register(lwm2m_context_t * contextP,
     coap_set_header_uri_query(transaction->message, query);
     coap_set_header_content_type(transaction->message, LWM2M_CONTENT_LINK);
 
-    transaction_set_payload(transaction, payload, payload_length);
+    transaction_set_payload(transaction, payload, (size_t) payload_length);
 
     registration_data_t * dataP = (registration_data_t *) lwm2m_malloc(sizeof(registration_data_t));
     if (dataP == NULL){
@@ -894,7 +894,7 @@ static int prv_updateRegistration(lwm2m_context_t * contextP,
             lwm2m_free(payload);
             return COAP_500_INTERNAL_SERVER_ERROR;
         }
-        transaction_set_payload(transaction, payload, payload_length);
+        transaction_set_payload(transaction, payload, (size_t) payload_length);
     }
 
     registration_data_t * dataP = (registration_data_t *) lwm2m_malloc(sizeof(registration_data_t));
@@ -1605,7 +1605,7 @@ static int prv_getId(uint8_t * data,
 }
 
 static lwm2m_client_object_t * prv_decodeRegisterPayload(uint8_t * payload,
-                                                         uint16_t payloadLength,
+                                                         size_t payloadLength,
                                                          lwm2m_media_type_t * format,
                                                          char ** altPath)
 {

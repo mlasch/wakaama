@@ -483,7 +483,7 @@ void transaction_step(lwm2m_context_t * contextP,
     }
 }
 
-void transaction_set_payload(lwm2m_transaction_t * transaction, uint8_t * buffer, int length)
+void transaction_set_payload(lwm2m_transaction_t * transaction, uint8_t * buffer, size_t length)
 {
     transaction->payload = buffer;
     transaction->payload_len = length;
