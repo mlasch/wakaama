@@ -492,6 +492,116 @@ static void prv_write_client(lwm2m_context_t * lwm2mH,
     prv_do_write_client(buffer, lwm2mH, false);
 }
 
+static void prv_write_client_from_file(lwm2m_context_t * lwm2mH,
+                             char * buffer,
+                             void * user_data)
+{
+    /* unused parameter */
+    (void)user_data;
+
+    uint16_t clientId;
+    lwm2m_uri_t uri;
+    lwm2m_data_t * dataP = NULL;
+    int count = 0;
+    char * end = NULL;
+    int result;
+    FILE *fh;
+
+    result = prv_read_id(buffer, &clientId);
+    if (result != 1) {
+        printf("Synatx error");
+        return;
+    }
+    buffer = get_next_arg(buffer, &end);
+    if (buffer[0] == 0) {
+        printf("Synatx error");
+        return;
+    }
+    result = lwm2m_stringToUri(buffer, end - buffer, &uri);
+    if (result == 0) {
+        printf("Synatx error");
+        return;
+    }
+    buffer = get_next_arg(end, &end);
+    if (buffer[0] == 0) {
+        printf("Synatx error");
+        return;
+    }
+    if (!check_end_of_args(end)) {
+        printf("Synatx error");
+        return;
+    }
+    size_t filename_length = end - buffer;
+    char* filename = buffer;
+
+    uint8_t* data_buffer;
+    size_t data_size;
+    filename[filename_length] = '\0';
+    fh = fopen(filename,"rb");
+    if (fh == NULL) {
+        printf("No such file or directory: %s", filename);
+        return;
+    }
+    fseek(fh, 0L, SEEK_END);
+    data_size = ftell(fh);
+    rewind(fh);
+    data_buffer = malloc(sizeof(uint8_t) * data_size);
+
+    fread(data_buffer, data_size,1, fh);
+
+    count = lwm2m_data_parse(&uri, data_buffer, data_size, LWM2M_CONTENT_OPAQUE, &dataP);
+    printf("%x %x %x %x %x %x %x %x\n", data_buffer[0], data_buffer[1], data_buffer[2], data_buffer[3], data_buffer[4], data_buffer[5],data_buffer[6], data_buffer[7]);
+    printf("%x %x %x %x %x %x %x %x\n", dataP->value.asBuffer.buffer[0], dataP->value.asBuffer.buffer[1], dataP->value.asBuffer.buffer[2], dataP->value.asBuffer.buffer[3], dataP->value.asBuffer.buffer[4], dataP->value.asBuffer.buffer[5],dataP->value.asBuffer.buffer[6], dataP->value.asBuffer.buffer[7]);
+    free(data_buffer);
+    if (count > 0)
+    {
+        lwm2m_client_t * clientP = NULL;
+        clientP = (lwm2m_client_t *)lwm2m_list_find((lwm2m_list_t *)lwm2mH->clientList, clientId);
+        if (clientP != NULL)
+        {
+//            lwm2m_media_type_t format = clientP->format;
+            lwm2m_media_type_t format = LWM2M_CONTENT_TLV;
+            uint8_t *serialized;
+            int length = lwm2m_data_serialize(&uri,
+                                              count,
+                                              dataP,
+                                              &format,
+                                              &serialized);
+            if (length > 0)
+            {
+                result = lwm2m_dm_write(lwm2mH,
+                                        clientId,
+                                        &uri,
+                                        format,
+                                        serialized,
+                                        length,
+                                        false,
+                                        prv_result_callback,
+                                        NULL);
+                lwm2m_free(serialized);
+            }
+            else
+            {
+                result = COAP_500_INTERNAL_SERVER_ERROR;
+            }
+        }
+        else
+        {
+            result = COAP_404_NOT_FOUND;
+        }
+        lwm2m_data_free(count, dataP);
+    }
+
+    if (result == 0)
+    {
+        fprintf(stdout, "OK");
+    }
+    else
+    {
+        prv_print_error(result);
+    }
+}
+
 static void prv_update_client(lwm2m_context_t * lwm2mH,
                               char * buffer,
                               void * user_data)
@@ -1067,6 +1177,11 @@ int main(int argc, char *argv[])
                                             "   URI: uri to write to such as /3, /3/0/2, /1024/11, /1024/0/1\r\n"
                                             "   DATA: data to write. Text or a supported JSON format.\r\n"
                                             "Result will be displayed asynchronously.", prv_write_client, NULL},
+            {"writef", "Write to a client from file.", " write CLIENT# URI DATA\r\n"
+                                            "   CLIENT#: client number as returned by command 'list'\r\n"
+                                            "   URI: uri to write to such as /3, /3/0/2, /1024/11, /1024/0/1\r\n"
+                                            "   FILE: read data to write. Filename.\r\n"
+                                            "Result will be displayed asynchronously.", prv_write_client_from_file, NULL},
             {"update", "Write to a client with partial update.", " update CLIENT# URI DATA\r\n"
                                             "   CLIENT#: client number as returned by command 'list'\r\n"
                                             "   URI: uri to write to such as /3, /3/0/2, /1024/11, /1024/0/1\r\n"

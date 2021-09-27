@@ -321,8 +321,16 @@ static lwm2m_transaction_t * prv_create_next_block_transaction(lwm2m_transaction
     {
         coap_set_header_if_none_match(clone->message);
     }
-    
-    clone->payload = transaction->payload;
+
+    uint8_t *cloned_transaction_payload;
+    cloned_transaction_payload = (uint8_t *) lwm2m_malloc(transaction->payload_len);
+    if (cloned_transaction_payload == NULL) {
+        LOG("Allocation failed");
+        return NULL;
+    }
+    memcpy(cloned_transaction_payload, transaction->payload, transaction->payload_len);
+
+    clone->payload = cloned_transaction_payload;
     clone->payload_len = transaction->payload_len;
     clone->callback = transaction->callback;
     clone->userData = transaction->userData;
@@ -332,14 +340,23 @@ static int prv_send_new_block1(lwm2m_context_t * contextP, lwm2m_transaction_t *
 {
     lwm2m_transaction_t * next;
     // Done sending block
-    if (block_num * block_size > previous->payload_len) return 0;
+    if (block_num * block_size >= previous->payload_len) return 0; // TODO >= ??
 
     next = prv_create_next_block_transaction(previous, contextP->nextMID++);
     if (next == NULL) return COAP_500_INTERNAL_SERVER_ERROR;
 
     coap_set_header_block1(next->message, block_num, (block_num + 1) * block_size < next->payload_len, block_size);
+//
+//    uint8_t*  block_payload = next->payload + block_num * block_size;
+//    size_t block_payload_size = MIN(block_size, next->payload_len - block_num * block_size);
+//    uint8_t* new_block_payload = malloc(block_payload_size);
+//    if (new_block_payload == NULL) {
+//        return COAP_500_INTERNAL_SERVER_ERROR;
+//    }
+//    memcpy(new_block_payload, block_payload, block_payload_size);
+//
+//    coap_set_payload(next->message, new_block_payload, block_payload_size);
     coap_set_payload(next->message, next->payload + block_num * block_size , MIN(block_size, next->payload_len - block_num * block_size));
-
     contextP->transactionList = (lwm2m_transaction_t *)LWM2M_LIST_ADD(contextP->transactionList, next);
     return transaction_send(contextP, next);
 }

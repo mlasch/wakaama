@@ -256,9 +256,18 @@ void transaction_free(lwm2m_transaction_t * transacP)
     {
        coap_free_header(transacP->message);
        lwm2m_free(transacP->message);
+       transacP->message = NULL;
     }
 
-    if (transacP->buffer) lwm2m_free(transacP->buffer);
+    if (transacP->buffer) {
+        lwm2m_free(transacP->buffer);
+        transacP->buffer = NULL;
+    }
+    if (transacP->payload) {
+        lwm2m_free(transacP->payload);
+        transacP->payload = NULL;
+    }
+    LOG("Free transaction");
     lwm2m_free(transacP);
 }
 
@@ -485,14 +494,21 @@ void transaction_step(lwm2m_context_t * contextP,
 
 void transaction_set_payload(lwm2m_transaction_t * transaction, uint8_t * buffer, size_t length)
 {
-    transaction->payload = buffer;
+    uint8_t* transaction_buffer;
+    transaction_buffer = malloc(length);
+    if (transaction_buffer == NULL) {
+        LOG("Unable to allocate memory");
+        return;
+    }
+    memcpy(transaction_buffer, buffer, length);
+    transaction->payload = transaction_buffer;
     transaction->payload_len = length;
     const uint16_t lwm2m_coap_block_size = lwm2m_get_coap_block_size();
     if (length > lwm2m_coap_block_size) {
         coap_set_header_block1(transaction->message, 0, true, lwm2m_coap_block_size);
     }
 
-    coap_set_payload(transaction->message, buffer, MIN(length, lwm2m_coap_block_size));
+    coap_set_payload(transaction->message, transaction_buffer, MIN(length, lwm2m_coap_block_size));
 }
 
 bool transaction_free_userData(lwm2m_context_t * context, lwm2m_transaction_t * transaction)
