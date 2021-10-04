@@ -1618,7 +1618,7 @@ static int prv_getId(uint8_t * data,
 
 static lwm2m_client_object_t *prv_decodeRegisterPayload(uint8_t *payload, size_t payloadLength,
                                                         lwm2m_media_type_t *format, char **altPath) {
-    uint16_t index;
+    size_t index;
     lwm2m_client_object_t * objList;
     bool linkAttrFound;
 
