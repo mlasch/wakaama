@@ -251,7 +251,7 @@ static void prv_printUri(const lwm2m_uri_t * uriP)
 
 static void prv_result_callback(lwm2m_context_t *contextP,
                                 uint16_t clientID,
-                                lwm2m_uri_t * uriP,
+                                const lwm2m_uri_t * uriP,
                                 int status,
                                 block_info_t * block_info,
                                 lwm2m_media_type_t format,
@@ -275,15 +275,15 @@ static void prv_result_callback(lwm2m_context_t *contextP,
     fflush(stdout);
 }
 
-static void prv_notify_callback(lwm2m_context_t *contextP,
+static void prv_notify_callback(const lwm2m_context_t *contextP,
                                 uint16_t clientID,
-                                lwm2m_uri_t * uriP,
+                                const lwm2m_uri_t * uriP,
                                 int count,
                                 block_info_t * block_info,
                                 lwm2m_media_type_t format,
                                 uint8_t * data,
                                 int dataLength,
-                                void * userData)
+                                const void * userData)
 {
     /* unused parameters */
     (void)contextP;
