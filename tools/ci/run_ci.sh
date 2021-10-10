@@ -126,7 +126,7 @@ function run_git_blame_ignore() {
 function run_build() {
   # Existing directory needed by SonarQube build-wrapper
   mkdir -p build-wakaama
-
+  echo ${CMAKE_ARGS}
   ${OPT_WRAPPER_CMD} cmake -GNinja -S . -B build-wakaama ${CMAKE_ARGS}
   ${OPT_WRAPPER_CMD} cmake --build build-wakaama
 }
@@ -160,7 +160,7 @@ function run_tests() {
       gcovr_file=("${REPO_ROOT_DIR}/build-wakaama/coverage/report.txt")
       ;;
     none)
-      gcovr "${gcovr_opts[@]}" >/dev/null
+      gcov --preserve-paths --long-file-names $(find build-wakaama -name '*.gcno')
       echo "Coverage measured, but no report generated"
       return 0
       ;;
