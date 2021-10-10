@@ -141,7 +141,7 @@ function run_tests() {
   fi
 
   #see https://github.com/koalaman/shellcheck/wiki/SC2089
-  gcovr_opts=(-r "${REPO_ROOT_DIR}/build-wakaama" \
+  gcovr_opts=(-r "${REPO_ROOT_DIR}" "${REPO_ROOT_DIR}/build-wakaama" \
     --keep `: # Needed for SonarQube` \
     --exclude "${REPO_ROOT_DIR}"/examples \
     --exclude "${REPO_ROOT_DIR}"/tests)
