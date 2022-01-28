@@ -72,12 +72,14 @@
 #define COAP_HEADER_TOKEN_LEN_POSITION       0
 
 #define COAP_HEADER_OPTION_DELTA_MASK        0xF0
+#define COAP_HEADER_OPTION_DELTA_RESERVED    0x0F
 #define COAP_HEADER_OPTION_SHORT_LENGTH_MASK 0x0F
+#define COAP_HEADER_OPTION_LENGTH_RESERVED   0x0F
 
 /* Bitmap for set options */
 enum { OPTION_MAP_SIZE = sizeof(uint8_t) * 8 };
-#define SET_OPTION(packet, opt) {if (opt <= sizeof((packet)->options) * OPTION_MAP_SIZE) {(packet)->options[opt / OPTION_MAP_SIZE] |= 1 << (opt % OPTION_MAP_SIZE);}}
-#define IS_OPTION(packet, opt) ((opt <= sizeof((packet)->options) * OPTION_MAP_SIZE)?(packet)->options[opt / OPTION_MAP_SIZE] & (1 << (opt % OPTION_MAP_SIZE)):0)
+#define SET_OPTION(packet, opt) {if (opt < sizeof((packet)->options) * OPTION_MAP_SIZE) {(packet)->options[opt / OPTION_MAP_SIZE] |= 1 << (opt % OPTION_MAP_SIZE);}}
+#define IS_OPTION(packet, opt) ((opt < sizeof((packet)->options) * OPTION_MAP_SIZE)?(packet)->options[opt / OPTION_MAP_SIZE] & (1 << (opt % OPTION_MAP_SIZE)):0)
 
 #ifndef MIN
 #define MIN(a, b) ((a) < (b)? (a) : (b))
@@ -102,6 +104,8 @@ typedef enum {
   COAP_PUT,
   COAP_DELETE
 } coap_method_t;
+
+#define COAP_EMPTY_MESSAGE_CODE 0x00
 
 /* CoAP response codes */
 typedef enum {
@@ -240,7 +244,7 @@ typedef struct {
   multi_option_t *uri_query;
   uint8_t if_none_match;
 
-  uint16_t payload_len;
+  size_t payload_len;
   uint8_t *payload;
 
 } coap_packet_t;
@@ -383,7 +387,7 @@ int coap_get_header_block(void *packet, uint32_t *num, uint8_t *more, uint16_t *
 int coap_get_header_size(void *packet, uint32_t *size);
 int coap_set_header_size(void *packet, uint32_t size);
 
-int coap_get_payload(void *packet, const uint8_t **payload);
-int coap_set_payload(void *packet, const void *payload, size_t length);
+size_t coap_get_payload(void *packet, const uint8_t **payload);
+size_t coap_set_payload(void *packet, const void *payload, size_t length);
 
 #endif /* COAP_13_H_ */
