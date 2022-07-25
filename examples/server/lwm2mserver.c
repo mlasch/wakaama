@@ -1018,7 +1018,7 @@ int main(int argc, char *argv[])
     struct timeval tv;
     int result;
     lwm2m_context_t * lwm2mH = NULL;
-    connection_t * connList = NULL;
+
     int addressFamily = AF_INET6;
     int opt;
     const char * localPort = LWM2M_STANDARD_PORT_STR;
@@ -1222,15 +1222,7 @@ int main(int argc, char *argv[])
                     fprintf(stderr, "%zd bytes received from [%s]:%hu\r\n", numBytes, s, ntohs(port));
                     output_buffer(stderr, buffer, (size_t)numBytes, 0);
 
-                    connP = connection_find(connList, &addr, addrLen);
-                    if (connP == NULL)
-                    {
-                        connP = connection_new_incoming(connList, sock, (struct sockaddr *)&addr, addrLen);
-                        if (connP != NULL)
-                        {
-                            connList = connP;
-                        }
-                    }
+                    connP = get_connection(sock, &addr, addrLen);
                     if (connP != NULL)
                     {
                         lwm2m_handle_packet(lwm2mH, buffer, (size_t)numBytes, connP);
@@ -1262,7 +1254,7 @@ int main(int argc, char *argv[])
 
     lwm2m_close(lwm2mH);
     close(sock);
-    connection_free(connList);
+    connection_free();
 
 #ifdef MEMORY_TRACE
     if (g_quit == 1)
