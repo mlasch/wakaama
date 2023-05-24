@@ -169,15 +169,19 @@ int cbor_get_type_and_value(const uint8_t * buffer,
                 }
             }
             *type = CBOR_TYPE_FLOAT;
-            *value = *(uint64_t*)&dval;
+//            *value = *(uint64_t*)&dval;
+
+            memcpy(value, &dval, sizeof(*value));
             break;
         case CBOR_AI_FOUR_BYTE_VALUE:
             {
                 int32_t val32 = val;
-                dval = *(float*)&val32;
+//                dval = *(float*)&val32;
+                memcpy(&dval, &val32, sizeof(dval));
             }
             *type = CBOR_TYPE_FLOAT;
-            *value = *(uint64_t*)&dval;
+//            *value = *(uint64_t*)&dval;
+            memcpy(value, &dval, sizeof(*value));
             break;
         case CBOR_AI_EIGHT_BYTE_VALUE:
             *type = CBOR_TYPE_FLOAT;
