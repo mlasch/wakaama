@@ -871,7 +871,10 @@ static void cbor_test_72(void) {
     CU_ASSERT_EQUAL_FATAL(size, 1);
     CU_ASSERT_EQUAL(tlvP->id, 1);
     CU_ASSERT_EQUAL_FATAL(tlvP->type, LWM2M_TYPE_FLOAT);
+    _Pragma("GCC diagnostic push");
+    _Pragma("GCC diagnostic ignored \"-Wfloat-equal\"");
     CU_ASSERT_NOT_EQUAL_FATAL(tlvP->value.asFloat, tlvP->value.asFloat);
+    _Pragma("GCC diagnostic pop");
     lwm2m_data_free(size, tlvP);
 }
 
@@ -890,7 +893,10 @@ static void cbor_test_73(void) {
     CU_ASSERT_EQUAL_FATAL(size, 1);
     CU_ASSERT_EQUAL(tlvP->id, 1);
     CU_ASSERT_EQUAL_FATAL(tlvP->type, LWM2M_TYPE_FLOAT);
+    _Pragma("GCC diagnostic push");
+    _Pragma("GCC diagnostic ignored \"-Wfloat-equal\"");
     CU_ASSERT_EQUAL_FATAL(tlvP->value.asFloat, -INFINITY);
+    _Pragma("GCC diagnostic pop");
     lwm2m_data_free(size, tlvP);
 }
 
@@ -909,7 +915,10 @@ static void cbor_test_74(void) {
     CU_ASSERT_EQUAL_FATAL(size, 1);
     CU_ASSERT_EQUAL(tlvP->id, 1);
     CU_ASSERT_EQUAL_FATAL(tlvP->type, LWM2M_TYPE_FLOAT);
+    _Pragma("GCC diagnostic push");
+    _Pragma("GCC diagnostic ignored \"-Wfloat-equal\"");
     CU_ASSERT_EQUAL_FATAL(tlvP->value.asFloat, INFINITY);
+    _Pragma("GCC diagnostic pop");
     lwm2m_data_free(size, tlvP);
 }
 
@@ -928,7 +937,10 @@ static void cbor_test_75(void) {
     CU_ASSERT_EQUAL_FATAL(size, 1);
     CU_ASSERT_EQUAL(tlvP->id, 1);
     CU_ASSERT_EQUAL_FATAL(tlvP->type, LWM2M_TYPE_FLOAT);
+    _Pragma("GCC diagnostic push");
+    _Pragma("GCC diagnostic ignored \"-Wfloat-equal\"");
     CU_ASSERT_NOT_EQUAL_FATAL(tlvP->value.asFloat, tlvP->value.asFloat);
+    _Pragma("GCC diagnostic pop");
     lwm2m_data_free(size, tlvP);
 }
 
@@ -947,7 +959,10 @@ static void cbor_test_76(void) {
     CU_ASSERT_EQUAL_FATAL(size, 1);
     CU_ASSERT_EQUAL(tlvP->id, 1);
     CU_ASSERT_EQUAL_FATAL(tlvP->type, LWM2M_TYPE_FLOAT);
+    _Pragma("GCC diagnostic push");
+    _Pragma("GCC diagnostic ignored \"-Wfloat-equal\"");
     CU_ASSERT_EQUAL_FATAL(tlvP->value.asFloat, -INFINITY);
+    _Pragma("GCC diagnostic pop");
     lwm2m_data_free(size, tlvP);
 }
 
