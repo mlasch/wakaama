@@ -48,7 +48,7 @@ jobs:
           -Dsonar.branch.name="${GITHUB_REF_NAME}" \
           -Dsonar.cfamily.build-wrapper-output=build-wakaama/sonar-cloud-build-wrapper-output \
           -Dsonar.cfamily.cache.enabled=false \
-          -Dsonar.cfamily.gcov.reportsPath=build-wakaama \
+          -Dsonar.cfamily.gcov.reportsPath=. \
           -Dsonar.cfamily.threads=2 \
           -Dsonar.exclusions="build-wakaama-*/**, .git/**" \
           -Dsonar.host.url=https://sonarcloud.io \
