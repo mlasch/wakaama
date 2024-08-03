@@ -98,6 +98,44 @@ static void test_registration_message_to_server(void) {
     coap_free_header(&actual_response_packet);
 }
 
+static void test_registration_update_message_to_server(void) {
+    /* arrange */
+    coap_packet_t packet;
+    memset(&packet, 0, sizeof(packet));
+    coap_init_message(&packet, COAP_TYPE_CON, COAP_POST, 0xbeef);
+    uint8_t token[] = {'t', 'o', 'k', 'e', 'n'};
+    coap_set_header_token(&packet, token, sizeof(token));
+    coap_set_header_uri_path(&packet, "rd/0");
+    //coap_set_header_content_type(&packet, content_type);
+    //coap_set_header_uri_query(&packet, "b=U&lwm2m=1.1&lt=300&ep=dummy-client");
+
+
+    uint8_t reg_coap_msg[80];
+    memset(reg_coap_msg, 0, sizeof(reg_coap_msg));
+    size_t msg_size = coap_serialize_message(&packet, reg_coap_msg);
+    CU_ASSERT_EQUAL(msg_size, 74);
+    coap_free_header(&packet);
+
+    /* act */
+    lwm2m_context_t *const server_ctx = lwm2m_init(NULL);
+    lwm2m_handle_packet(server_ctx, reg_coap_msg, msg_size, NULL);
+    lwm2m_close(server_ctx);
+
+    /* assert */
+    size_t send_buffer_len;
+    uint8_t *send_buffer = test_get_response_buffer(&send_buffer_len);
+    coap_packet_t actual_response_packet;
+    CU_ASSERT_EQUAL(14, send_buffer_len);
+    coap_status_t status = coap_parse_message(&actual_response_packet, send_buffer, send_buffer_len);
+    CU_ASSERT_EQUAL(status, NO_ERROR);
+
+    ASSERT_RESPONSE_HEADER(actual_response_packet, COAP_201_CREATED);
+    ASSERT_RESPONSE_LOCATION_PATH(actual_response_packet, "rd");
+    ASSERT_RESPONSE_PAYLOAD_EMPTY(actual_response_packet);
+
+    coap_free_header(&actual_response_packet);
+}
+
 static void test_registration_message_to_server_wrong_content_type(void) {
 
     /* Only `LWM2M_CONTENT_TEXT` and `LWM2M_CONTENT_LINK` are allowed for registration. */
@@ -213,6 +251,7 @@ static void test_registration_with_two_rt(void) {
 
 static struct TestTable table[] = {
     {"test_registration_message_to_server", test_registration_message_to_server},
+    {"test_registration_update_message_to_server", test_registration_update_message_to_server},
     {"test_registration_message_to_server_wrong_content_type", test_registration_message_to_server_wrong_content_type},
     {"test_registration_with_rt", test_registration_with_rt},
     {"test_registration_without_rt", test_registration_without_rt},
