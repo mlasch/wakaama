@@ -30,9 +30,9 @@ jobs:
     - name: Install dependencies from APT repository
       run: |
         sudo apt-get update
-        sudo apt-get install cmake libcunit1-dev ninja-build unzip wget
+        sudo apt-get install cmake libcunit1-dev ninja-build
 
-    - name: Build all binaries
+    - name: Build wakaama
       run: |
         tools/ci/run_ci.sh --run-build --sanitizer ${{ matrix.sanitizer }}  --verbose
       env:
@@ -44,7 +44,7 @@ jobs:
       env:
         CC:  ${{ matrix.compiler }}
 
-    - name: Build examples
+    - name: Build and test examples
       run: |
         tools/ci/run_ci.sh \
           --run-clean \
@@ -58,7 +58,7 @@ jobs:
     - name: Unit test examples
       run: |
         tools/ci/run_ci.sh \
-          --run-tests
+          --run-tests \
           --source-directory examples/${{ matrix.example }} \
           --build-directory wakaama-build-${{ matrix.example }}
       env:
